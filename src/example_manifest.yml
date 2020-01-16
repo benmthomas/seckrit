@@ -1,0 +1,26 @@
+---
+# Your Google Cloud project ID. Required for getting secrets.
+gcp_project_id: my-gcp-project-id
+# Environment name being deployed. Provides an additional layer of protection
+# against using secrets from the wrong environment.
+environment: dev
+# Destination file path for the 'environment' file. This file will be sourced
+# by your actual Pod container.
+environment_file: /etc/my-project/my-app/environment
+# List of secrets to fetch.
+secrets:
+    # Name of the secret to fetch.
+  - name: dev-rabbitmq-username
+    # How the secret should be made available to the app.
+    type: environment_variable
+    # Destination for the secret. For environment variables, this is a
+    # variable name. For files, it is an absolute file path.
+    destination: SPRING_RABBITMQ_USERNAME
+
+  - name: dev-rabbitmq-password
+    type: environment_variable
+    destination: SPRING_RABBITMQ_PASSWORD
+
+  - name: dev-my-app-gcp-service-account
+    type: file
+    destination: /etc/my-project/my-app/gcp-service-account.json

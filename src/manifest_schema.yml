@@ -1,0 +1,40 @@
+---
+gcp_project_id:
+  required: true
+  nullable: false
+  type: string
+app:
+  required: true
+  nullable: false
+  type: string
+environment:
+  required: true
+  nullable: false
+  type: string
+environment_file:
+  required: true
+  nullable: false
+  type: string
+  default: /etc/seckrit/environment
+secrets:
+  required: true
+  nullable: false
+  type: list
+  schema:
+    type: dict
+    schema:
+      name:
+        required: true
+        nullable: false
+        type: string
+      type:
+        required: true
+        nullable: false
+        type: string
+        allowed:
+          - environment_variable
+          - file
+      destination:
+        required: true
+        nullable: false
+        type: string
