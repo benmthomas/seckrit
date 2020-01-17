@@ -10,8 +10,14 @@ from google.oauth2 import service_account
 
 
 def main(args):
+
     # Load the YAML file that tells us which secrets we want to load (and what to do with them).
-    manifest = load_manifest(args.manifest_file)
+    if args.manifest:
+        manifest = load_manifest(args.manifest)
+    elif "SECKRIT_MANIFEST" in os.environ:
+        manifest = yaml.safe_load(os.environ.get('SECKRIT_MANIFEST'))
+    else:
+        raise RuntimeError("Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
 
     # Create the GCP Secret Manager client using the default credential provider chain.
     credentials_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
@@ -90,5 +96,5 @@ def load_manifest(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetches secrets from Google Cloud Secret Manager according to a YAML manifest.")
-    parser.add_argument("manifest_file", metavar="MANIFEST_FILE", help="YAML manifest file specifying which secrets to fetch and how they should be treated.")
+    parser.add_argument("--manifest", metavar="MANIFEST_FILE", help="YAML manifest file specifying which secrets to fetch and how they should be treated.")
     main(parser.parse_args())
