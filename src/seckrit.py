@@ -14,7 +14,12 @@ def main(args):
     manifest = load_manifest(args.manifest_file)
 
     # Create the GCP Secret Manager client using the default credential provider chain.
-    client = secretmanager_v1beta1.SecretManagerServiceClient()
+    credentials_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+    if credentials_json is not None:
+        credentials = service_account.Credentials.from_service_account_info(credentials_json)
+        client = secretmanager_v1beta1.SecretManagerServiceClient(credentials=credentials)
+    else:
+        client = secretmanager_v1beta1.SecretManagerServiceClient()
     project = client.project_path(manifest["gcp_project_id"])
 
     # Prepare paths to write a file containing environment variables.
