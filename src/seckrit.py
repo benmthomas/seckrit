@@ -20,7 +20,7 @@ def main(args):
         raise RuntimeError("Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
 
     # Create the GCP Secret Manager client using the default credential provider chain.
-    credentials_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+    credentials_json = json.load(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON"))
     if credentials_json is not None:
         credentials = service_account.Credentials.from_service_account_info(credentials_json)
         client = secretmanager_v1beta1.SecretManagerServiceClient(credentials=credentials)
