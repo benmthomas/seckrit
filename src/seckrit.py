@@ -5,7 +5,6 @@ import cerberus
 import json
 import os
 import yaml
-import logging
 from google.cloud import secretmanager_v1beta1
 from google.oauth2 import service_account
 
@@ -117,7 +116,9 @@ def validate_manifest(manifest):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Fetches secrets from Google Cloud Secret Manager according to a YAML manifest.")
-    parser.add_argument("--manifest", metavar="MANIFEST_FILE",
+        description="Fetches secrets from Google Cloud Secret Manager according to a YAML manifest.\n Users can "
+                    "either pass the path to the manifest as an argument or instead store the YAML content in the "
+                    "SECKRIT_MANIFEST environement variable.")
+    parser.add_argument("--manifest", metavar="MANIFEST_FILE", required=False,
                         help="YAML manifest file specifying which secrets to fetch and how they should be treated.")
     main(parser.parse_args())
