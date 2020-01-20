@@ -17,7 +17,7 @@ def main(args):
     elif "SECKRIT_MANIFEST" in os.environ:
         manifest = load_manifest_from_string()
     else:
-        print("ERROR: Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
+        print("ERROR: You must either pass the --manifest argument or define the SECKRIT_MANIFEST environment variable")
         exit(1)
 
     # Create the GCP Secret Manager client using the credentials stored in the environment otherwise use the default
