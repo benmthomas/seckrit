@@ -13,15 +13,16 @@ def main(args):
 
     # Load the YAML file that tells us which secrets we want to load (and what to do with them).
     if args.manifest:
-        manifest = load_manifest(args.manifest)
+        manifest = load_manifest_from_file(args.manifest)
     elif "SECKRIT_MANIFEST" in os.environ:
-        manifest = yaml.safe_load(os.environ.get('SECKRIT_MANIFEST'))
+        manifest = load_manifest_from_string()
     else:
         raise RuntimeError("Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
 
     # Create the GCP Secret Manager client using the default credential provider chain.
-    credentials_json = json.load(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON"))
-    if credentials_json is not None:
+    credentials_string = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+    if credentials_string is not None:
+        credentials_json = json.loads(credentials_string)
         credentials = service_account.Credentials.from_service_account_info(credentials_json)
         client = secretmanager_v1beta1.SecretManagerServiceClient(credentials=credentials)
     else:
@@ -43,7 +44,8 @@ def main(args):
         secret_type = secret_info["type"]
 
         if secret_type == "environment_variable":
-            print("Adding environment variable {} to {}".format(secret_info["destination"], manifest["environment_file"]))
+            print(
+                "Adding environment variable {} to {}".format(secret_info["destination"], manifest["environment_file"]))
             environment_file.write("{}={}\n".format(secret_info["destination"], secret.decode("utf-8")))
         elif secret_type == "file":
             destination = secret_info["destination"]
@@ -69,15 +71,31 @@ def create_parent_dirs(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
-def load_manifest(path):
+def load_manifest_from_file(path):
     """
-    Loads and validates the YAML manifest at the given path,
-    returning a dictionary containing instructions for returning secrets.
+    Loads the YAML manifest at the given path,
+    sends the YAML for validation and returns the result.
     """
     # Load the manifest file.
     with open(path) as manifest_file:
         manifest = yaml.safe_load(manifest_file)
+    return validate_manifest(manifest)
 
+
+def load_manifest_from_string():
+    """
+    Loads the YAML manifest from the environment variable,
+    sends the YAML for validation and returns the result.
+    """
+    manifest = yaml.safe_load(os.environ.get('SECKRIT_MANIFEST'))
+    return validate_manifest(manifest)
+
+
+def validate_manifest(manifest):
+    """
+    Validates the YAML manifest being passed as argument,
+    returning a dictionary containing instructions for returning secrets
+    """
     # Load the schema for validating the manifest file.
     script_path = os.path.dirname(os.path.realpath(__file__))
     schema_path = os.path.join(script_path, "manifest_schema.yml")
@@ -95,6 +113,8 @@ def load_manifest(path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetches secrets from Google Cloud Secret Manager according to a YAML manifest.")
-    parser.add_argument("--manifest", metavar="MANIFEST_FILE", help="YAML manifest file specifying which secrets to fetch and how they should be treated.")
+    parser = argparse.ArgumentParser(
+        description="Fetches secrets from Google Cloud Secret Manager according to a YAML manifest.")
+    parser.add_argument("--manifest", metavar="MANIFEST_FILE",
+                        help="YAML manifest file specifying which secrets to fetch and how they should be treated.")
     main(parser.parse_args())
