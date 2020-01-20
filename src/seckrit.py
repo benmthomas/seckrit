@@ -22,9 +22,8 @@ def main(args):
 
     # Create the GCP Secret Manager client using the credentials stored in the environment otherwise use the default
     # credential provider chain.
-    credentials_string = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
-    if credentials_string is not None:
-        credentials_json = json.loads(credentials_string)
+    if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in os.environ:
+        credentials_json = json.loads(os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))
         credentials = service_account.Credentials.from_service_account_info(credentials_json)
         client = secretmanager_v1beta1.SecretManagerServiceClient(credentials=credentials)
     else:
@@ -46,8 +45,7 @@ def main(args):
         secret_type = secret_info["type"]
 
         if secret_type == "environment_variable":
-            print(
-                "Adding environment variable {} to {}".format(secret_info["destination"], manifest["environment_file"]))
+            print("Adding environment variable {} to {}".format(secret_info["destination"], manifest["environment_file"]))
             environment_file.write("{}={}\n".format(secret_info["destination"], secret.decode("utf-8")))
         elif secret_type == "file":
             destination = secret_info["destination"]
@@ -95,8 +93,7 @@ def load_manifest_from_string():
 
 def validate_manifest(manifest):
     """
-    Validates the YAML manifest being passed as argument,
-    returning a dictionary containing instructions for returning secrets
+    Validates and returns the given manifest dictionary containing instructions for returning secrets.
     """
     # Load the schema for validating the manifest file.
     script_path = os.path.dirname(os.path.realpath(__file__))
