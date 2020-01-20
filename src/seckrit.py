@@ -5,6 +5,7 @@ import cerberus
 import json
 import os
 import yaml
+import logging
 from google.cloud import secretmanager_v1beta1
 from google.oauth2 import service_account
 
@@ -17,7 +18,8 @@ def main(args):
     elif "SECKRIT_MANIFEST" in os.environ:
         manifest = load_manifest_from_string()
     else:
-        raise RuntimeError("Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
+        print("ERROR: Should pass --manifest argument or define SECKRIT_MANIFEST environment variable")
+        exit(1)
 
     # Create the GCP Secret Manager client using the default credential provider chain.
     credentials_string = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
