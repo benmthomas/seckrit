@@ -10,8 +10,8 @@ from google.oauth2 import service_account
 
 
 def main(args):
-    # Load the YAML file that tells us which secrets we want to load (and what to do with them).
-    manifest = load_manifest(args.manifest_file)
+    # Load and validate the YAML file that tells us which secrets we want to load.
+    manifest = load_valid_manifest(args.manifest_file)
 
     # Create the GCP Secret Manager client using the default credential provider chain.
     client = secretmanager_v1beta1.SecretManagerServiceClient()
@@ -58,7 +58,7 @@ def create_parent_dirs(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
-def load_manifest(path):
+def load_valid_manifest(path):
     """
     Loads and validates the YAML manifest at the given path,
     returning a dictionary containing instructions for returning secrets.
