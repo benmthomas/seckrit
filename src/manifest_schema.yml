@@ -3,10 +3,6 @@ gcp_project_id:
   required: true
   nullable: false
   type: string
-app:
-  required: true
-  nullable: false
-  type: string
 environment:
   required: true
   nullable: false
