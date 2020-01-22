@@ -4,6 +4,7 @@ gcp_project_id:
   nullable: false
   type: string
 app:
+  required: false
   nullable: false
   type: string
 environment:
